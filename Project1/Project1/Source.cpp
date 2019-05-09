@@ -37,14 +37,29 @@ std::ostream& operator<<(std::ostream& os, const City& a) {
 
 using Dollars = double;
 
-Dollars **createMatrix() {
-	Dollars **sw = new Dollars*[15];
+Dollars **createMatrix(Dollars **&sw) {
+	Dollars **routes = new Dollars*[15];
 	for (int i = 0; i < 15; i++) {
-		sw[i] = new Dollars[15];
+		routes[i] = new Dollars[15];
 		for (int j = 0; j < 15; j++) {
+			routes[i][j] = 0;
+		}
+	}
+	routes[0][1] = 57.6; routes[0][2] = 67.1;  routes[0][3] = 35.2;  routes[0][4] = 143;  routes[0][9] = 139;
+	routes[1][2] = 40.3; routes[1][4] = 145;  routes[2][3] = 49.7;  routes[4][5] = 125;
+	routes[4][6] = 168;  routes[4][8] = 95;  routes[4][9] = 60.5; routes[5][9] = 69.6;
+	routes[5][12] = 70.1; routes[6][7] = 38.2; routes[6][13] = 28.9;  routes[7][11] = 167;
+	routes[7][13] = 68.6;  routes[8][9] = 190;  routes[9][12] = 140; routes[9][13] = 140;
+	routes[10][11] = 88.9;  routes[10][12] = 300; routes[10][14] = 215;  routes[11][14] = 111;
+	routes[12][14] = 151;  routes[13][14] = 211;
+
+	for (int i = 0; i < 15; i++) {
+		for (int j = 0; j < 15; j++) {
+			if (routes[i][j] != 0) routes[j][i] = routes[i][j];
 			sw[i][j] = 0;
 		}
 	}
+	
 	sw[0][5] = 166; sw[0][6] = 300; sw[0][7] = 327; sw[0][8] = 244; sw[0][10] = 469;
 	sw[0][11] = 384; sw[0][12] = 169; sw[0][13] = 279; sw[0][14] = 313; sw[1][3] = 65.8;
 	sw[1][5] = 189; sw[1][6] = 281; sw[1][7] = 293; sw[1][8] = 210; sw[1][9] = 120;
@@ -61,10 +76,23 @@ Dollars **createMatrix() {
 	sw[7][14] = 248; sw[8][10] = 351; sw[8][10] = 351; sw[8][11] = 296; sw[8][12] = 274;
 	sw[8][13] = 170; sw[8][14] = 309; sw[9][10] = 362; sw[9][11] = 261; sw[9][14] = 228;
 	sw[10][13] = 190; sw[11][12] = 215; sw[11][13] = 127; sw[12][13] = 214;
+	
+	for (int i = 0; i < 15; i++) {
+		for (int j = i; j < 15; j++) {
+			if (sw[i][j] == 0) {
+				sw[i][j] = routes[i][j];
+				sw[j][i] = routes[i][j];
+			}
+			else {
+				sw[j][i] = sw[i][j];
+			}
+		}
+	}
+
+	return routes;
 }
 
-inline Dollars straight_way(City current, City destination) {
-	Dollars **sw = createMatrix();
+inline Dollars straight_way(City current, City destination, Dollars **sw) {
 
 	return sw[current][destination];
 }
@@ -76,39 +104,27 @@ int main() {
 	const City names[] = { Сoфія, Самоков, Дупница, Пернік, Пловдив, Троян, Ямбол, Єлхово,
 Кирджалі, Карлово, Варна, Шумен, Плевен, Слівен, Русе };
 
-	Dollars **routes = new Dollars*[15];
+	Dollars **sw = new Dollars*[15];
 	for (int i = 0; i < 15; i++) {
-		routes[i] = new Dollars[15];
-		routes[i][i] = 0;
-		for (int j = 0; j < 15; j++) {
-			routes[i][j] = 0;
-		}
+		sw[i] = new Dollars[15];
 	}
-	routes[0][1] = 57.6; routes[0][2] = 67.1;  routes[0][3] = 35.2;  routes[0][4] = 143;  routes[0][9] = 139;
-	routes[1][2] = 40.3; routes[1][4] = 145;  routes[2][3] = 49.7;  routes[4][5] = 125;
-	routes[4][6] = 168;  routes[4][8] = 95;  routes[4][9] = 60.5; routes[5][9] = 69.6;
-	routes[5][12] = 70.1; routes[6][7] = 38.2; routes[6][13] = 28.9;  routes[7][11] = 167;
-	routes[7][13] = 68.6;  routes[8][9] = 190;  routes[9][12] = 140; routes[9][13] = 140;
-	routes[10][11] = 88.9;  routes[10][12] = 300; routes[10][14] = 215;  routes[11][14] = 111;
-	routes[12][14] = 151;  routes[13][14] = 211;
-
-	for (int i = 0; i < 15; i++) {
-		for (int j = i; j < 15; j++) {
-			if (routes[i][j] != 0) routes[j][i] = routes[i][j];
-		}
-	}
+	Dollars **routes = createMatrix(sw);
+	
+	
+	
 
 	for (auto start : names) {
 		for (auto end : names) {
 			if (start == end) continue;
-			list<City> route = aStar<City, Dollars, 15>(start, end, names, routes, straight_way);
-			cout << "From " << start << " To " << end <<" Distance "<< straight_way(start,end)<< endl;
+			list<City> route = aStar<City, Dollars, 15>(start, end, names, routes,sw, straight_way);
+			cout << "From " << start << " To " << end <<" Distance "<< straight_way(start,end,sw)<<" Route: "<<endl;
 			for (auto stop : route) {
 				cout << stop << " -> ";
 			}
 			cout << endl;
 		}
 	}
+	
 	cout << endl;
 	system("pause");
 }

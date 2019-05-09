@@ -1,16 +1,5 @@
 #pragma once
 
-/*
-A* graph search finds the optimal path from some start node in a weighted
-digraph to an end node provided such a path exists. A* uses a priority queue to
-ensure the algorithm first searches elements which minimize the traversal cost
-to the curent node and the value of a heurisic which estimates the future cost
-from the current node to the destination.
-This implementation uses an adjacency matrix to represent a digraph, however,
-which works best in cases where the adjacency matrix is dense meaning each node
-in the digraph is connected to many other nodes in the graph.
- */
-
 #include <array>
 #include <deque>
 #include <iostream>
@@ -27,10 +16,10 @@ std::list<Node> aStar(
 	const Node &START,
 	const Node &GOAL,
 	const Node vertex[N],
-	const Cost graph[N][N],
-	Cost(*heuristic)(Node current, Node goal));
+	Cost **graph,
+	Cost **sw,
+	Cost(*heuristic)(Node current, Node goal, Cost **sw));
 
-// Find an item by value in a Deque and return true if it is found, utility
 template<typename T>
 bool contains(std::deque<T> queue, T node) {
 	for (auto item : queue) {
@@ -41,8 +30,6 @@ bool contains(std::deque<T> queue, T node) {
 	}
 }
 
-// Assuming an array contains a given value, find the index of it's first
-// appearance
 template<typename Node, size_t N>
 size_t index_of(Node node, const Node nodes[N]) {
 	for (size_t n = 0; n < N; n++) {
@@ -51,25 +38,22 @@ size_t index_of(Node node, const Node nodes[N]) {
 }
 
 template<typename Node, typename Cost, size_t N>
-std::list<Node> aStar
-(const Node &START,
-	const Node &GOAL, const Node vertex[N],
+std::list<Node> aStar(
+	const Node &START,
+	const Node &GOAL, 
+	const Node vertex[N],
 	Cost **graph,
-	Cost(*heuristic)(Node current, Node goal))
+	Cost **sw,
+	Cost(*heuristic)(Node current, Node goal, Cost **sw))
 {
-	// Priority queue: discovered but unevaluated nodes starting from the start
-	// The priority is the heuristic + cost thus prioritizing the most efficient
-	// neighbour by placing it at the top of the queue
 	typedef std::pair<Cost, size_t> El;
 	std::priority_queue<El, std::vector<El>, std::greater<El>> frontier;
 	frontier.emplace(0, index_of<Node, N>(START, vertex));
-	// Set of evaluated nodes to prevent unecessary duplicate exploration
+
 	std::deque<size_t> explored;
 
-	// The most efficient neighbor for each vertex so we have a way to
-	// reconstruct the most efficient path by "unwinding" parents
 	std::unordered_map<size_t, size_t> parent;
-	// Cost value of each vertex
+
 	std::unordered_map<size_t, Cost> aggregateCost;
 	aggregateCost[frontier.top().second] = 0;
 
@@ -90,12 +74,11 @@ std::list<Node> aStar
 			if (!contains(explored, n) || cost < aggregateCost[n]) {
 				parent[n] = current;
 				aggregateCost[n] = cost;
-				frontier.emplace(cost + heuristic(vertex[n], GOAL), n);
+				frontier.emplace(cost + heuristic(vertex[n], GOAL, sw), n);
 			}
 		}
 	}
 
-	// Unwind the most efficient parents for each node to construct optimal path
 	std::list<Node> path;
 	path.push_front(vertex[current]);
 	while (vertex[current] != START) {
