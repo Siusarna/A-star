@@ -1,86 +1,48 @@
 #include <iostream>
 #include <fstream>
 #include <list>
+#include <string>
 #include "a-star.hpp"
+#include <Windows.h>
 
-/*
-# Airport Example:
-This exmaple hopes to determine the cheapest route from one airport to another
-using the flight time as a heuristic.
-Finding flight routes are a good case for adjacency matrix digraphs because they
-tend to be dense (it's possible to fly from nearly any airport to any other
-airport), making them memory efficient.
-A-star finds the cheapest route by exploring all of the neighbour airports to
-find the airport with the lowest flight time to the destination and lowset Cost
-from the start until it finds the optimal path.
- */
+using namespace std;
 
-enum Airport { LAX, MIA, ATL, DEN, JFK };
 
-// Define stream insertion for pretty printing
+enum City {
+	Сoфія, Самоков, Дупница, Пернік, Пловдив, Троян, Ямбол, Єлхово,
+	Кирджалі, Карлово, Варна, Шумен, Плевен, Слівен, Русе
+};
+
+std::ostream& operator<<(std::ostream& os, const City& a) {
+	std::string out;
+	switch (a) {
+	case Сoфія: out = "Софія"; break;
+	case Самоков: out = "Самоков"; break;
+	case Дупница: out = "Дупница"; break;
+	case Пернік: out = "Пернік"; break;
+	case Пловдив: out = "Пловдив"; break;
+	case Троян: out = "Троян"; break;
+	case Ямбол: out = "Ямбол"; break;
+	case Єлхово: out = "Єлхово"; break;
+	case Кирджалі: out = "Кирджалі"; break;
+	case Карлово: out = "Карлово"; break;
+	case Варна: out = "Варна"; break;
+	case Шумен: out = "Шумен"; break;
+	case Плевен: out = "Плевен"; break;
+	case Слівен: out = "Слівен"; break;
+	case Русе: out = "Русе"; break;
+	}
+	return os << out;
+}
 
 using Dollars = double;
 
-// Flight time in minutes between airports to use as heuristic for A*
-inline Dollars flight_time(Airport current, Airport destination) {
-	Dollars times[5][5] = {
-		//LAX   MIA   ATL   DEN   JFK
-		{   0, 4 * 60, 3 * 60, 1 * 60, 5 * 60}, // LAX
-		{4 * 60,    0, 1 * 60, 4 * 60, 3 * 60}, // MIA
-		{3 * 60, 2 * 60,    0, 2 * 60, 4 * 60}, // ATL
-		{1 * 60, 4 * 60, 2 * 60,    0, 4 * 60}, // DEN
-		{5 * 60, 3 * 60, 3 * 60, 4 * 60,    0}  // JFK
-	};
-
-	return times[current][destination];
-}
-
-int main() {
-
-	// Define vertex names which correspond to matrix row and column    // labels
-	const Airport names[] = { LAX, MIA, ATL, DEN, JFK };
-
-	// Define adjacency matrix where flights from each row airport to each
-	// column airport correspond to an edge with the associated cost
-	const Dollars routes[][5] = {
-		//LAX MIA  ATL  DEN  JFK
-		{  0, 500, 200, 136, 299}, // LAX
-		{438,   0, 114, 330, 247}, // MIA
-		{204, 104,   0, 199, 205}, // ATL
-		{116, 300, 164,   0, 247}, // DEN
-		{275, 230, 198, 212,   0}  // JFK
-	};
-
-	std::list<Airport> route = aStar<Airport, Dollars>(LAX, MIA, names, routes, flight_time);
-
-	std::cout << "Cheapest route, expect LAX -> ATL -> MIA,\nfound ";
-	for (auto stop : route) {
-		std::cout << " -> " << stop;
-	}
-}
-
-double **createMatrix(double **&sw) {
-	double **arr = new double*[15];
+Dollars **createMatrix() {
+	Dollars **sw = new Dollars*[15];
 	for (int i = 0; i < 15; i++) {
-		arr[i] = new double[15];
-		arr[i][i] = 0;
-		for (int j = 0; i < 15; j++) {
-			arr[i][j] = 0;
+		sw[i] = new Dollars[15];
+		for (int j = 0; j < 15; j++) {
 			sw[i][j] = 0;
-		}
-	}
-	arr[0][1] = 57.6; arr[0][2] = 67.1;  arr[0][3] = 35.2;  arr[0][4] = 143;  arr[0][9] = 139;
-	arr[1][2] = 40.3; arr[1][4] = 145;  arr[2][3] = 49.7;  arr[4][5] = 125;
-	arr[4][6] = 168;  arr[4][8] = 95;  arr[4][9] = 60.5; arr[5][9] = 69.6;
-	arr[5][12] = 70.1; arr[6][7] = 38.2; arr[6][13] = 28.9;  arr[7][11] = 167;
-	arr[7][13] = 68.6;  arr[8][9] = 190;  arr[9][12] = 140; arr[9][13] = 140;
-	arr[10][11] = 88.9;  arr[10][12] = 300; arr[10][14] = 215;  arr[11][14] = 111;
-	arr[12][14] = 151;  arr[13][14] = 211;
-	for (int i = 0; i < 15; i++) {
-		for (int j = i; j < 15; j++) {
-			if (arr[i][j] != 0) {
-				arr[j][i] = arr[i][j];
-			}
 		}
 	}
 	sw[0][5] = 166; sw[0][6] = 300; sw[0][7] = 327; sw[0][8] = 244; sw[0][10] = 469;
@@ -99,19 +61,55 @@ double **createMatrix(double **&sw) {
 	sw[7][14] = 248; sw[8][10] = 351; sw[8][10] = 351; sw[8][11] = 296; sw[8][12] = 274;
 	sw[8][13] = 170; sw[8][14] = 309; sw[9][10] = 362; sw[9][11] = 261; sw[9][14] = 228;
 	sw[10][13] = 190; sw[11][12] = 215; sw[11][13] = 127; sw[12][13] = 214;
+}
+
+inline Dollars straight_way(City current, City destination) {
+	Dollars **sw = createMatrix();
+
+	return sw[current][destination];
+}
+
+int main() {
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+
+	const City names[] = { Сoфія, Самоков, Дупница, Пернік, Пловдив, Троян, Ямбол, Єлхово,
+Кирджалі, Карлово, Варна, Шумен, Плевен, Слівен, Русе };
+
+	Dollars **routes = new Dollars*[15];
+	for (int i = 0; i < 15; i++) {
+		routes[i] = new Dollars[15];
+		routes[i][i] = 0;
+		for (int j = 0; j < 15; j++) {
+			routes[i][j] = 0;
+		}
+	}
+	routes[0][1] = 57.6; routes[0][2] = 67.1;  routes[0][3] = 35.2;  routes[0][4] = 143;  routes[0][9] = 139;
+	routes[1][2] = 40.3; routes[1][4] = 145;  routes[2][3] = 49.7;  routes[4][5] = 125;
+	routes[4][6] = 168;  routes[4][8] = 95;  routes[4][9] = 60.5; routes[5][9] = 69.6;
+	routes[5][12] = 70.1; routes[6][7] = 38.2; routes[6][13] = 28.9;  routes[7][11] = 167;
+	routes[7][13] = 68.6;  routes[8][9] = 190;  routes[9][12] = 140; routes[9][13] = 140;
+	routes[10][11] = 88.9;  routes[10][12] = 300; routes[10][14] = 215;  routes[11][14] = 111;
+	routes[12][14] = 151;  routes[13][14] = 211;
 
 	for (int i = 0; i < 15; i++) {
 		for (int j = i; j < 15; j++) {
-			if (sw[i][j] == 0) {
-				sw[i][j] = arr[i][j];
-				sw[j][i] = arr[i][j];
-			}
-			if (sw[i][j] != 0) {
-				sw[j][i] = sw[i][j];
-			}
+			if (routes[i][j] != 0) routes[j][i] = routes[i][j];
 		}
 	}
 
-
-	return arr;
+	for (auto start : names) {
+		for (auto end : names) {
+			if (start == end) continue;
+			list<City> route = aStar<City, Dollars, 15>(start, end, names, routes, straight_way);
+			cout << "From " << start << " To " << end <<" Distance "<< straight_way(start,end)<< endl;
+			for (auto stop : route) {
+				cout << stop << " -> ";
+			}
+			cout << endl;
+		}
+	}
+	cout << endl;
+	system("pause");
 }
+
