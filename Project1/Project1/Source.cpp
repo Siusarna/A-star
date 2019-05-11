@@ -7,7 +7,6 @@
 
 using namespace std;
 
-
 enum City {
 	Сoфія, Самоков, Дупница, Пернік, Пловдив, Троян, Ямбол, Єлхово,
 	Кирджалі, Карлово, Варна, Шумен, Плевен, Слівен, Русе
@@ -45,12 +44,12 @@ Dollars **createMatrix(Dollars **&sw) {
 			routes[i][j] = 0;
 		}
 	}
-	routes[0][1] = 57.6; routes[0][2] = 67.1;  routes[0][3] = 35.2;  routes[0][4] = 143;  routes[0][9] = 139;
-	routes[1][2] = 40.3; routes[1][4] = 145;  routes[2][3] = 49.7;  routes[4][5] = 125;
-	routes[4][6] = 168;  routes[4][8] = 95;  routes[4][9] = 60.5; routes[5][9] = 69.6;
-	routes[5][12] = 70.1; routes[6][7] = 38.2; routes[6][13] = 28.9;  routes[7][11] = 167;
-	routes[7][13] = 68.6;  routes[8][9] = 190;  routes[9][12] = 140; routes[9][13] = 140;
-	routes[10][11] = 88.9;  routes[10][12] = 300; routes[10][14] = 215;  routes[11][14] = 111;
+	routes[0][1] = 57; routes[0][2] = 67;  routes[0][3] = 35;  routes[0][4] = 143;  routes[0][9] = 139;
+	routes[1][2] = 40; routes[1][4] = 145;  routes[2][3] = 49;  routes[4][5] = 125;
+	routes[4][6] = 168;  routes[4][8] = 95;  routes[4][9] = 60; routes[5][9] = 69;
+	routes[5][12] = 70; routes[6][7] = 38; routes[6][13] = 28;  routes[7][11] = 167;
+	routes[7][13] = 68;  routes[8][9] = 190;  routes[9][12] = 140; routes[9][13] = 140;
+	routes[10][11] = 88;  routes[10][12] = 300; routes[10][14] = 215;  routes[11][14] = 111;
 	routes[12][14] = 151;  routes[13][14] = 211;
 
 	for (int i = 0; i < 15; i++) {
@@ -97,6 +96,14 @@ inline Dollars straight_way(City current, City destination, Dollars **sw) {
 	return sw[current][destination];
 }
 
+size_t index_of(City node, const City nodes[15]) {
+	for (size_t n = 0; n < 15; n++) {
+		if (nodes[n] == node) { return n; }
+	}
+}
+
+
+
 int main() {
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
@@ -109,23 +116,24 @@ int main() {
 		sw[i] = new Dollars[15];
 	}
 	Dollars **routes = createMatrix(sw);
-	
-	
-	
-
+	Dollars **half_routes = new Dollars*[15];
+	for (int i = 0; i < 15; i++) {
+		half_routes[i] = new Dollars[15];
+	}
 	for (auto start : names) {
 		for (auto end : names) {
 			if (start == end) continue;
+			cout << "From " << start << " To " << end << " Distance " << straight_way(start, end, sw) << " Route: " << endl;
 			list<City> route = aStar<City, Dollars, 15>(start, end, names, routes,sw, straight_way);
-			cout << "From " << start << " To " << end <<" Distance "<< straight_way(start,end,sw)<<" Route: "<<endl;
 			for (auto stop : route) {
 				cout << stop << " -> ";
 			}
 			cout << endl;
+		
 		}
 	}
+
 	
 	cout << endl;
 	system("pause");
 }
-
