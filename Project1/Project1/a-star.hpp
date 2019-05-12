@@ -8,7 +8,6 @@
 #include <queue>
 #include <utility>
 
-#include "a_star.cpp"
 
 using namespace std;
 
@@ -19,6 +18,7 @@ std::list<Node> aStar(
 	const Node vertex[N],
 	Cost **graph,
 	Cost **sw,
+	int &distance,
 	Cost(*heuristic)(Node current, Node goal, Cost **sw));
 
 template<typename T>
@@ -56,6 +56,7 @@ std::list<Node> aStar(
 	const Node vertex[N],
 	Cost **graph,
 	Cost **sw,
+	int &distance,
 	Cost(*heuristic)(Node current, Node goal, Cost **sw))
 {
 	int i = 0;
@@ -79,6 +80,7 @@ std::list<Node> aStar(
 	
 			while (vertex[current] != START) {
 				path.push_front(vertex[current]);
+				distance += graph[current][parent[current]];
 				current = parent[current];
 			}
 			path.push_front(START);

@@ -34,12 +34,12 @@ std::ostream& operator<<(std::ostream& os, const City& a) {
 	return os << out;
 }
 
-using Dollars = double;
+using Kilometres = double;
 
-Dollars **createMatrix(Dollars **&sw) {
-	Dollars **routes = new Dollars*[15];
+Kilometres **createMatrix(Kilometres **&sw) {
+	Kilometres **routes = new Kilometres*[15];
 	for (int i = 0; i < 15; i++) {
-		routes[i] = new Dollars[15];
+		routes[i] = new Kilometres[15];
 		for (int j = 0; j < 15; j++) {
 			routes[i][j] = 0;
 		}
@@ -91,7 +91,7 @@ Dollars **createMatrix(Dollars **&sw) {
 	return routes;
 }
 
-inline Dollars straight_way(City current, City destination, Dollars **sw) {
+inline Kilometres straight_way(City current, City destination, Kilometres **sw) {
 
 	return sw[current][destination];
 }
@@ -111,20 +111,18 @@ int main() {
 	const City names[] = { Сoфія, Самоков, Дупница, Пернік, Пловдив, Троян, Ямбол, Єлхово,
 Кирджалі, Карлово, Варна, Шумен, Плевен, Слівен, Русе };
 
-	Dollars **sw = new Dollars*[15];
+	Kilometres **sw = new Kilometres*[15];
 	for (int i = 0; i < 15; i++) {
-		sw[i] = new Dollars[15];
+		sw[i] = new Kilometres[15];
 	}
-	Dollars **routes = createMatrix(sw);
-	Dollars **half_routes = new Dollars*[15];
-	for (int i = 0; i < 15; i++) {
-		half_routes[i] = new Dollars[15];
-	}
+	Kilometres **routes = createMatrix(sw);
+	int distance = 0;
 	for (auto start : names) {
 		for (auto end : names) {
 			if (start == end) continue;
-			cout << "From " << start << " To " << end << " Distance " << straight_way(start, end, sw) << " Route: " << endl;
-			list<City> route = aStar<City, Dollars, 15>(start, end, names, routes,sw, straight_way);
+			distance = 0;
+			list<City> route = aStar<City, Kilometres, 15>(start, end, names, routes, sw, distance ,straight_way);
+			cout << "From " << start << " To " << end << " Distance " << distance << " Route: " << endl;
 			for (auto stop : route) {
 				cout << stop << " -> ";
 			}
