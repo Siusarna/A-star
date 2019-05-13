@@ -118,29 +118,22 @@ int main() {
 	}
 	Kilometres **routes = createMatrix(sw);
 	int distance = 0;
-	int distance1 = 0;
 	for (auto start : names) {
 		for (auto end : names) {
 			if (start == end) continue;
 			distance = 0;
-			distance1 = 0;
 			list<City> route = aStar<City, Kilometres, 15>(start, end, names, routes, sw, distance ,straight_way);
-			list<City> route1 = greedy<City, Kilometres, 15>(start, end, names, routes, sw, distance1, straight_way);
 			cout << "From " << start << " To " << end << " Distance " << distance << " Route: " << endl;
 			for (auto stop : route) {
 				cout << stop << " -> ";
 			}
 			cout << endl;
-			cout << "From " << start << " To " << end << " Distance " << distance1 << " Route: " << endl;
-			for (auto stop : route1) {
-				cout << stop << " -> ";
-			}
-			cout << endl;
-			cout << endl;
-		
 		}
 	}
-	/*for (auto start : names) {
+	cout << endl;
+	cout << "Greedy algorithm" << endl;
+	cout << endl;
+	for (auto start : names) {
 		for (auto end : names) {
 			if (start == end) continue;
 			distance = 0;
@@ -152,7 +145,7 @@ int main() {
 			cout << endl;
 
 		}
-	}*/
+	}
 	
 	cout << endl;
 	system("pause");
